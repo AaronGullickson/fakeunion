@@ -3,9 +3,10 @@ Type: Package
 Title: Create Dataset of Counterfactual and Actual Unions
 Version: 0.0.1
 Author: Aaron Gullickson <aarong@uoregon.edu>
-Maintainer: Aaron Gullicksn <aarong@uoregon.edu>
+Maintainer: Aaron Gullickson <aarong@uoregon.edu>
 Description: Take a dataset of real unions and alternate partners and constructs a counterfactual set of unions that can be used in a conditional logit model to predict actual unions. 
-License: GPL 3
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
+

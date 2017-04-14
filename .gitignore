@@ -1,4 +1,4 @@
-**/.DS_Store
-.Rbuildignore
 .Rproj.user
-**/*.Rproj
+.Rhistory
+.RData
+.Ruserdata
