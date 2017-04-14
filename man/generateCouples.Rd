@@ -4,15 +4,15 @@
 \alias{generateCouples}
 \title{Generate Counterfactual Couples}
 \usage{
-generateCouples(n, geo, men, women, actual, id = "id", weight = NULL,
+generateCouples(n, actual, men, women, geo, id = "id", weight = NULL,
   keep = NULL, verbose = TRUE)
 }
 \arguments{
-\item{n}{the number of counterfactual unions to create for each real union}
+\item{n}{the number of counterfactual unions to create for each real union.}
 
-\item{geo}{a character string giving the name of the variable that identifies the clusters that alternate
-partners should be sampled from. This variable must be named the same way in \code{men},
-\code{women}, and \code{actual}.}
+\item{actual}{a data.frame identifying identifying the actual couples. This dataset should have the variable identified
+by \code{geo} and variables for husbands and wives ids that end in "h" and "w" respectively. It should also
+contain all the same variables ending in "h" and "w" that should be kept in the final analysis.}
 
 \item{men}{a data.frame object identifying all the potential "male" partners. This data.frame must include the
 variable identified by \code{geo} above and it must also contain an id variable whose name starts with
@@ -23,9 +23,9 @@ in \code{actual} and should correspond to variables in \code{women} that end in 
 \item{women}{a data.frame object identifying all the potential "female" partners. Its format should be the
 same as \code{men}, except variables should end in "w" rather than "h".}
 
-\item{actual}{a data.frame identifying identifying the actual couples. This dataset should have the variable identified
-by \code{geo} and variables for husbands and wives ids that end in "h" and "w" respectively. It should also
-contain all the same variables ending in "h" and "w" that should be kept in the final analysis.}
+\item{geo}{a character string giving the name of the variable that identifies the clusters that alternate
+partners should be sampled from. This variable must be named the same way in \code{men},
+\code{women}, and \code{actual}.}
 
 \item{id}{a character string giving part of the variable name to identify partners in \code{actual}, \code{men}, and
 \code{women}. In each of the datasets, the actual variable name should be appended with "h" and "w" for
@@ -63,4 +63,25 @@ For each actual union, the program randomly determines one of the two spouses to
 ensure that all characteristics of a single spouse are fixed within the fixed effects conditional logit model.
 
 Currently the format of the datasets must be followed exactly for the function to work correctly.
+}
+\examples{
+#generate three counterfactual couples for each real couples
+#in example ACS data
+markets <- generateCouples(3,acs.couples,
+                           acs.malealters,acs.femalealters,
+                           "state",weight="perwt",keep="hhwt")
+
+#check that there is one real marriage and three counterfactual
+#marriages for each case
+summary(tapply(markets$choice,markets$group,sum))
+summary(tapply(!markets$choice,markets$group,sum))
+
+\dontrun{
+#load survival function and run clogit command to estimate how age
+#differences and racial exogamy affect the log-odds of union formation
+require(survival)
+model <- clogit(choice~I(ageh-agew)+I((ageh-agew)^2)+I(raceh!=racew)
+                       +strata(group), data=markets)
+summary(model)
+}
 }

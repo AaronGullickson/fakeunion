@@ -6,6 +6,14 @@
 \usage{
 organizeColumns(couples, geo, keep = NULL)
 }
+\arguments{
+\item{couples}{A data frame of the actual and counterfactual couples.}
+
+\item{geo}{A character string giving the name of the clustering variable.}
+
+\item{keep}{A vector of character strings giving additional variables to keep that don't end in
+"h" or "w".}
+}
 \description{
 This is an internal function used by \code{generateCouples} to organize the final
            dataset returned from the function.

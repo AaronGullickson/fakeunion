@@ -3,10 +3,10 @@
 #' @description  This function will sample a set of alternate partners from a data.frame for a set of actual
 #'               unions in order to generate a set of counterfactual unions that can be used in a conditional
 #'               logit model to predict the characteristics that are likely to lead to a union match.
-#' @param n the number of counterfactual unions to create for each real union
-#' @param geo a character string giving the name of the variable that identifies the clusters that alternate
-#'            partners should be sampled from. This variable must be named the same way in \code{men},
-#'            \code{women}, and \code{actual}.
+#' @param n the number of counterfactual unions to create for each real union.
+#' @param actual a data.frame identifying identifying the actual couples. This dataset should have the variable identified
+#'              by \code{geo} and variables for husbands and wives ids that end in "h" and "w" respectively. It should also
+#'              contain all the same variables ending in "h" and "w" that should be kept in the final analysis.
 #' @param men a data.frame object identifying all the potential "male" partners. This data.frame must include the
 #'           variable identified by \code{geo} above and it must also contain an id variable whose name starts with
 #'           the string given by \code{id} and end with "h". Any person-specific variable that should be kept in the
@@ -14,9 +14,9 @@
 #'           in \code{actual} and should correspond to variables in \code{women} that end in "w".
 #' @param women a data.frame object identifying all the potential "female" partners. Its format should be the
 #'             same as \code{men}, except variables should end in "w" rather than "h".
-#' @param actual a data.frame identifying identifying the actual couples. This dataset should have the variable identified
-#'              by \code{geo} and variables for husbands and wives ids that end in "h" and "w" respectively. It should also
-#'              contain all the same variables ending in "h" and "w" that should be kept in the final analysis.
+#' @param geo a character string giving the name of the variable that identifies the clusters that alternate
+#'            partners should be sampled from. This variable must be named the same way in \code{men},
+#'            \code{women}, and \code{actual}.
 #' @param id a character string giving part of the variable name to identify partners in \code{actual}, \code{men}, and
 #'           \code{women}. In each of the datasets, the actual variable name should be appended with "h" and "w" for
 #'           husbands and wives respectively.
@@ -41,7 +41,27 @@
 #'              sampled for them. This should be used as the fixed effect in fixed effects models.}
 #' \item{choice}{a boolean variables that is \code{TRUE} if this is an actual union and \code{FALSE} if this is a
 #' counterfactual union. This variable should be used as the dependent variable in a fixed effect conditional logit model.}
-generateCouples <- function(n, geo, men, women, actual, id="id",
+#' @examples
+#' #generate three counterfactual couples for each real couples
+#' #in example ACS data
+#' markets <- generateCouples(3,acs.couples,
+#'                            acs.malealters,acs.femalealters,
+#'                            "state",weight="perwt",keep="hhwt")
+#'
+#' #check that there is one real marriage and three counterfactual
+#' #marriages for each case
+#' summary(tapply(markets$choice,markets$group,sum))
+#' summary(tapply(!markets$choice,markets$group,sum))
+#'
+#' \dontrun{
+#' #load survival function and run clogit command to estimate how age
+#' #differences and racial exogamy affect the log-odds of union formation
+#' require(survival)
+#' model <- clogit(choice~I(ageh-agew)+I((ageh-agew)^2)+I(raceh!=racew)
+#'                        +strata(group), data=markets)
+#' summary(model)
+#' }
+generateCouples <- function(n, actual, men, women, geo, id="id",
                             weight=NULL, keep=NULL, verbose=TRUE) {
 
   if(!require(wrswoR)) {
@@ -114,8 +134,8 @@ generateCouples <- function(n, geo, men, women, actual, id="id",
 
   #combine fakes with reals
   partners <- rbind(organizeColumns(real,geo,keep), fakes)
-
   partners$group <- as.factor(partners$group)
+  partners <- partners[order(partners$group),]
 
   if(verbose) {
     cat("Done\n")
@@ -193,6 +213,10 @@ samplePartners <- function(actual, eligibles, n, partner, weight=NULL, id="id") 
 #' Organize columns for final union data
 #' @description This is an internal function used by \code{generateCouples} to organize the final
 #'            dataset returned from the function.
+#' @param couples A data frame of the actual and counterfactual couples.
+#' @param geo A character string giving the name of the clustering variable.
+#' @param keep A vector of character strings giving additional variables to keep that don't end in
+#'             "h" or "w".
 organizeColumns <- function(couples, geo, keep=NULL) {
   return(couples[c(which(colnames(couples) %in% c(geo,"group","choice",keep)),
                    grep("h$",colnames(couples)),
