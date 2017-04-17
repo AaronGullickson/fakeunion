@@ -175,6 +175,7 @@ samplePartners <- function(actual, eligibles, n, partner, weight=NULL, id="id") 
     warning("partner argument must be h or w")
     break
   }
+
   id.ego <- paste(id,ego,sep="")
   id.partner  <- paste(id,partner,sep="")
 
@@ -183,6 +184,12 @@ samplePartners <- function(actual, eligibles, n, partner, weight=NULL, id="id") 
     weight <- rep(1,nrow(eligibles))
   } else {
     weight <- eligibles[,weight]
+  }
+
+  #if n is greater than the number of eligibles, then reduce n, but produce warning
+  if(n>nrow(eligibles)) {
+    warning("sample size greater than number of eligibles")
+    n <- nrow(eligibles)
   }
 
   idx.fakes <- as.vector(replicate(nrow(actual),
