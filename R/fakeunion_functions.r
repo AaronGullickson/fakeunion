@@ -82,10 +82,6 @@ generateCouples <- function(n, actual, men, women, geo, id="id",
                   paste(small.areas,collapse=", "),collapse=" "))
   }
 
-  freq.men <- table(men[,geo])
-  freq.women <- table(women[,geo])
-
-
   #initialize dataset of fake marriages
   fakes <- NULL
 
