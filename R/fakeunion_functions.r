@@ -214,7 +214,7 @@ samplePartners <- function(actual, eligibles, n, partner, weight=NULL, id="id") 
     #resample, while explicitly removing all already assigned spouses from pool (including real one)
     alreadyassigned <- fakes[which(fakes[,id.ego]==fakes[j,id.ego]),id.partner]
     validEligibles <- eligibles[which(!(eligibles[,id.partner] %in% alreadyassigned)),]
-    if(length(validEligibles)==0) {
+    if(nrow(validEligibles)==0) {
       toRemove <- c(toRemove,j)
     } else {
       #newPartner <- eligibles[sample(which(!(eligibles[,id.partner] %in% alreadyassigned)),1),]
