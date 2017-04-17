@@ -76,6 +76,16 @@ generateCouples <- function(n, actual, men, women, geo, id="id",
   #get all unique markets
   markets <- unique(na.omit(actual[,geo]))
 
+  small.areas <- names(which(table(men[,geo])<n | table(women[,geo])<n))
+  if(length(small.areas)>0) {
+    warning(paste("The following areas had less than the required sample for men and women and the entire list was drawn:",
+                  paste(small.areas,collapse=", "),collapse=" "))
+  }
+
+  freq.men <- table(men[,geo])
+  freq.women <- table(women[,geo])
+
+
   #initialize dataset of fake marriages
   fakes <- NULL
 
@@ -181,19 +191,18 @@ samplePartners <- function(actual, eligibles, n, partner, weight=NULL, id="id") 
 
   #do the sampling
   if(is.null((weight))) {
-    weight <- rep(1,nrow(eligibles))
+    eligibles$weight <- rep(1,nrow(eligibles))
   } else {
-    weight <- eligibles[,weight]
+    eligibles$weight <- eligibles[,weight]
   }
 
   #if n is greater than the number of eligibles, then reduce n, but produce warning
   if(n>nrow(eligibles)) {
-    warning("sample size greater than number of eligibles")
     n <- nrow(eligibles)
   }
 
   idx.fakes <- as.vector(replicate(nrow(actual),
-                                   sample_int_expj(nrow(eligibles),n,weight)))
+                                   sample_int_expj(nrow(eligibles),n,eligibles$weight)))
 
   #combine the actual spouse with the fakes
   fakes <- cbind(actual[rep(1:nrow(actual),each=n),!grepl(paste(partner,"$",sep=""),colnames(actual))],
@@ -203,11 +212,25 @@ samplePartners <- function(actual, eligibles, n, partner, weight=NULL, id="id") 
   #address any cases where we might have accidently drawn the real match
   dupe.idx <- which(actual[rep(1:nrow(actual),each=n),id.partner]==fakes[,id.partner])
 
+  toRemove <- NULL
+
   for(j in dupe.idx) {
     #resample, while explicitly removing all already assigned spouses from pool (including real one)
     alreadyassigned <- fakes[which(fakes[,id.ego]==fakes[j,id.ego]),id.partner]
-    newPartner <- eligibles[sample(which(!(eligibles[,id.partner] %in% alreadyassigned)),1),]
-    fakes[j,grep(paste(partner,"$",sep=""),colnames(fakes))] <- newPartner[grep(paste(partner,"$",sep=""),colnames(eligibles))]
+    validEligibles <- eligibles[which(!(eligibles[,id.partner] %in% alreadyassigned)),]
+    if(length(validEligibles)==0) {
+      toRemove <- c(toRemove,j)
+    } else {
+      #newPartner <- eligibles[sample(which(!(eligibles[,id.partner] %in% alreadyassigned)),1),]
+      newPartner <- validEligibles[sample_int_expj(nrow(validEligibles),1,validEligibles$weight),]
+      fakes[j,grep(paste(partner,"$",sep=""),colnames(fakes))] <- newPartner[grep(paste(partner,"$",sep=""),
+                                                                                  colnames(eligibles))]
+    }
+  }
+
+  #remove any duplicates where we couldn't resample
+  if(length(toRemove)>0) {
+    fake <- fakes[-toRemove]
   }
 
   fakes$group <- fakes[,id.ego]
