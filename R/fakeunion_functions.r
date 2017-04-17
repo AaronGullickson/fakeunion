@@ -77,9 +77,9 @@ generateCouples <- function(n, actual, men, women, geo, id="id",
   markets <- unique(na.omit(actual[,geo]))
 
   small.areas <- names(which(table(men[,geo])<n | table(women[,geo])<n))
-  if(length(small.areas)>0) {
+  if(any(small.areas %in% markets)) {
     warning(paste("The following areas had less than the required sample for men and women and the entire list was drawn:",
-                  paste(small.areas,collapse=", "),collapse=" "))
+                  paste(small.areas[small.areas %in% markets],collapse=", "),collapse=" "))
   }
 
   #initialize dataset of fake marriages
