@@ -67,21 +67,21 @@ Currently the format of the datasets must be followed exactly for the function t
 \examples{
 #generate three counterfactual couples for each real couples
 #in example ACS data
-markets <- generateCouples(3,acs.couples,
-                           acs.malealters,acs.femalealters,
-                           "state",weight="perwt",keep="hhwt")
+market <- generateCouples(3,acs.couples,
+                          acs.malealters,acs.femalealters,
+                          "state",weight="perwt",keep="hhwt")
 
 #check that there is one real marriage and three counterfactual
 #marriages for each case
-summary(tapply(markets$choice,markets$group,sum))
-summary(tapply(!markets$choice,markets$group,sum))
+summary(tapply(market$choice,market$group,sum))
+summary(tapply(!market$choice,market$group,sum))
 
 \dontrun{
 #load survival function and run clogit command to estimate how age
 #differences and racial exogamy affect the log-odds of union formation
 require(survival)
 model <- clogit(choice~I(ageh-agew)+I((ageh-agew)^2)+I(raceh!=racew)
-                       +strata(group), data=markets)
+                       +strata(group), data=market)
 summary(model)
 }
 }
