@@ -1,5 +1,7 @@
 # fakeunion - An R package for generating counterfactual unions
 
+[![DOI](https://zenodo.org/badge/88232957.svg)](https://zenodo.org/badge/latestdoi/88232957)
+
 This R package contains functions that will generate a set of "fake" unions (e.g. marriages, cohabitations), given a set of real unions and alternate partners. The key function `generateCouples` will sample from the list of alternate partners to create a dataset that contains both real and fake unions. This dataset can then be used to run a fixed effect conditional logit model to predict what partner characteristics are likely to be associated with a real match.
 
 ## Installation
