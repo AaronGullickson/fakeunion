@@ -72,73 +72,77 @@ generateCouples <- function(n, actual, men, women, geo, id="id",
     cat("\tSet up....")
   }
 
-  #get all unique markets
-  markets <- unique(na.omit(actual[,geo]))
+  #remove cases that are missing values on clustering variable
+  actual <- actual[!is.na(actual[,geo]),]
+  men <- men[!is.na(men[,geo]),]
+  women <- women[!is.na(women[,geo]),]
 
+  #remove men and women that come from clusters that are not present in actual
+  markets <- unique(actual[,geo])
+  men <- men[men[,geo] %in% markets,]
+  women <- women[women[,geo] %in% markets,]
+
+  #check if sample size exceeds the number of alternates in market area
   small.areas <- names(which(table(men[,geo])<n | table(women[,geo])<n))
   if(any(small.areas %in% markets)) {
     warning(paste("The following areas had less than the required sample for men and women and the entire list was drawn:",
                   paste(small.areas[small.areas %in% markets],collapse=", "),collapse=" "))
   }
 
-  #initialize dataset of fake marriages
-  fakes <- NULL
-
-  #set up groups for actual marriages
-  actual$group <- NA
+  #decide whether to sample husband or wife
+  actual$sampled <- sample(c("h","w"),nrow(actual),replace=TRUE)
 
   if(verbose) {
     cat("Done\n")
   }
 
   if(verbose) {
-    cat("\tSampling from markets:")
+    cat("\tSampling from markets...")
   }
 
-  #loop through markets and create fakes
-  for(i in markets) {
+  #split the datasets up by the clustering variable
+  markets.actual <- split(actual, actual[,geo], drop=TRUE)
+  markets.men <- split(men, men[,geo], drop=TRUE)
+  markets.women <- split(women, women[,geo], drop=TRUE)
 
-    if(verbose) {
-      cat("\n\t\t")
-      cat(i)
-    }
+  if(length(markets.actual)!=length(markets.men)) {
+    stop("The number of clusters for alternate male partners does not equal the number of clusters for actual unions")
+  }
+  if(length(markets.actual)!=length(markets.women)) {
+    stop("The number of clusters for alternate female partners does not equal the number of clusters for actual unions")
+  }
+  if(any(names(markets.actual)!=names(markets.men))) {
+    stop("The clusters for actual unions do not match the clusters for alternate male partners")
+  }
+  if(any(names(markets.actual)!=names(markets.women))) {
+    stop("The clusters for actual unions do not match the clusters for alternate female partners")
+  }
 
-    #get the index for actual marriages
-    idx <- which(actual[,geo]==i)
+  #sample the counterfactual unions. The use of the mapply and do.call dramatically speeds up processing
+  #time compared to for-looping through each cluster
+  fakes <- do.call("rbind",
+                   mapply(function(market.actual, market.men, market.women) {
+                                rbind(organizeColumns(samplePartners(subset(market.actual,sampled=="h"),
+                                                                     market.women,n,"w", weight, id),
+                                                      geo, keep),
+                                      organizeColumns(samplePartners(subset(market.actual,sampled=="w"),
+                                                                     market.men,n,"h", weight, id),
+                                                      geo, keep))
+                          },
+                          markets.actual, markets.men, markets.women,SIMPLIFY=FALSE))
+  row.names(fakes) <- NULL
 
-    #split the actual unions so that roughly half get wives randomly selected
-    #and the other half get husbands randomly selected
-    tmp <- sample(1:2,length(idx),replace=TRUE)
-    idx.h <- idx[tmp==1]
-    idx.w <- idx[tmp==2]
-    rm(tmp)
-
-    if(length(idx.h)>0) {
-      actual$group[idx.h] <- actual[idx.h,paste(id,"h",sep="")]
-      fakes.men <- samplePartners(actual[idx.h,],women[which(women[,geo]==i),],n,"w", weight, id)
-      fakes <- rbind(fakes, organizeColumns(fakes.men,geo,keep))
-    }
-
-    if(length(idx.w)>0) {
-      actual$group[idx.w] <- actual[idx.w,paste(id,"w",sep="")]
-      fakes.women <- samplePartners(actual[idx.w,],men[which(men[,geo]==i),],n,"h", weight, id)
-      fakes <- rbind(fakes, organizeColumns(fakes.women,geo,keep))
-    }
+  if(verbose) {
+    cat("Done.\n")
   }
 
   if(verbose) {
-    cat("\n\tSampling complete.")
+    cat("\tCombining data....")
   }
 
-  if(verbose) {
-    cat("\n\tCombining data....")
-  }
-
-  real <- actual[!is.na(actual[,geo]),]
-  real$choice <- TRUE
-
-  #combine fakes with reals
-  partners <- rbind(organizeColumns(real,geo,keep), fakes)
+  actual$choice <- TRUE
+  actual$group <- ifelse(actual$sampled=="h", actual$idh, actual$idw)
+  partners <- rbind(organizeColumns(actual,geo,keep), fakes)
   partners$group <- as.factor(partners$group)
   partners <- partners[order(partners$group),]
 
@@ -170,6 +174,10 @@ generateCouples <- function(n, actual, men, women, geo, id="id",
 #'      such duplication occurs.
 #' @return a data.frame object similar to \code{actual} but containing only counterfactual unions.
 samplePartners <- function(actual, eligibles, n, partner, weight=NULL, id="id") {
+
+  if(nrow(actual)==0) {
+    return(NULL)
+  }
 
   #set up ego and partner string ids
   ego <- "h"
