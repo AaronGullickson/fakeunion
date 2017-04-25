@@ -1,7 +1,7 @@
 Package: fakeunion
 Type: Package
 Title: Create Dataset of Counterfactual and Actual Unions
-Version: 0.0.1
+Version: 0.1.0
 Author: Aaron Gullickson <aarong@uoregon.edu>
 Maintainer: Aaron Gullickson <aarong@uoregon.edu>
 Description: Take a dataset of real unions and alternate partners and constructs a 
