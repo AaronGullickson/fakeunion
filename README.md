@@ -74,23 +74,16 @@ This program will randomly choose either the husband or wife of the actual coupl
 
 I have tested out the processing time of the `generateCouples` under a variety of scenarios. The American Community Survey data I use has 73,536 actual couples, 2.35 million alternate male partners, and 2.76 million alternate female partners. I test clustering at three different levels: metro area, state, and country. Since all respondents were resident in the USA, the "country" level is effectively a single cluster.
 
-I also created a smaller dataset by sampling 10% of the data from my actual couples and alternates. Finally, I tested the effect of taking probability samples by weighting and using flat sampling. The results are presented in the table below. I record processing time in seconds. The computations were run from a high-end linux computer.
+I also created a smaller dataset by sampling 10% of the data from my actual couples and alternates. The results are presented in the table below. I record processing time in seconds. The computations were run from a high-end linux computer.
 
-|size   |	cluster	| weights	   | N3	    | N5	  | N10	  | N30	  | N50    |
-|:------|:--------|:-----------|-------:|------:|------:|------:|-------:|
-|Small	| metro	  | unweighted | 17.36	| 16.76 |	26.10	| 64.17	| 102.68 |
-|Small	| metro	  | weighted	 | 18.40	| 16.89	| 26.39	| 64.52	| 101.88 |
-|Small	| state	  | unweighted |	4.36	|  4.28	|  6.68	| 17.12	|  25.81 |
-|Small	| state	  | weighted	 |  4.36	|  4.27	|  6.67	| 17.18	|  25.48 |
-|Small	| country	| unweighted |	6.57	|  6.64	|  6.83	|  7.51	|   8.22 |
-|Small	| country	| weighted	 |  6.57	|  6.64	|  6.83	|  7.51	|   8.22 |
-|Large	| metro	  | unweighted |173.44	|175.10	|270.74	|666.56	|1091.80 |
-|Large	| metro	  | weighted	 |167.32	|171.18	|273.09	|659.00 |1088.92 |
-|Large	| state	  | unweighted | 58.70	| 61.36	| 87.54	|183.15	| 287.52 |
-|Large	| state	  | weighted	 | 58.58	| 61.36	| 86.14	|185.42	| 285.77 |
-|Large	| country	| unweighted |625.25	|624.38	|626.86	|638.11	| 648.72 |
-|Large	| country	| weighted	 |625.25	|624.38	|626.86	|638.11	| 648.72 |
-
+|size  |cluster |    N3|    N5|   N10|   N30|   N50|
+|:-----|:-------|-----:|-----:|-----:|-----:|-----:|
+|Small |metro   |   2.7|   2.7|   3.0|   4.8|   5.9|
+|Small |state   |   1.6|   1.2|   1.5|   2.8|   4.1|
+|Small |country |   6.9|   6.8|   7.0|   8.0|   9.3|
+|Large |metro   |  20.7|  22.0|  27.1|  52.7|  76.8|
+|Large |state   |  36.0|  37.2|  41.7|  55.3|  69.2|
+|Large |country | 626.9| 627.4| 630.9| 643.4| 659.1|
 
 ### Conditional Logit Models
 
