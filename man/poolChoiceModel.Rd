@@ -13,13 +13,17 @@ performed on each dataset.}
 \item{datasets}{a list of datasets where each dataset is produced from the \code{\link{generateCouples}} function.}
 }
 \value{
-a data.frame object with the following elements:
-\item{b.pool}{The average coefficient across datasets.}
-\item{se.pool}{standard error that combined within and between variance}
-\item{z.pool}{z-statistic from dividing b by se}
-\item{pvalue.pool}{p-value for the hypothesis test that the coefficient is zero in the population}
-\item{within.var}{The square of the mean standard error across datasets}
-\item{between.var}{the variance of the coefficient across datasets}
+a list containing the following objects:
+\item{coefficients}{a data.frame object with the following elements:}
+\itemize{
+    \item{b.pool: }{The average coefficient across datasets.}
+    \item{se.pool: }{standard error that combined within and between variance}
+    \item{z.pool: }{z-statistic from dividing b by se}
+    \item{pvalue.pool: }{p-value for the hypothesis test that the coefficient is zero in the population}
+    \item{within.var: }{The square of the mean standard error across datasets}
+    \item{between.var: }{the variance of the coefficient across datasets}
+    }
+\item{bic}{A vector of BIC statistic for each dataset relative to the null model.}
 }
 \description{
 Given a list of multiple datasets of real and counterfactual unionts and a model formula, this function

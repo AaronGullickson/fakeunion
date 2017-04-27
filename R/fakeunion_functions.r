@@ -282,13 +282,17 @@ organizeColumns <- function(couples, geo, keep=NULL) {
 #'
 #'          Models are estimated using the \code{\link[survival]{clogit}} function from the \pkg{survival} package. This package
 #'          must be installed.
-#' @return a data.frame object with the following elements:
-#' \item{b.pool}{The average coefficient across datasets.}
-#' \item{se.pool}{standard error that combined within and between variance}
-#' \item{z.pool}{z-statistic from dividing b by se}
-#' \item{pvalue.pool}{p-value for the hypothesis test that the coefficient is zero in the population}
-#' \item{within.var}{The square of the mean standard error across datasets}
-#' \item{between.var}{the variance of the coefficient across datasets}
+#' @return a list containing the following objects:
+#' \item{coefficients}{a data.frame object with the following elements:}
+#' \itemize{
+#'     \item{b.pool: }{The average coefficient across datasets.}
+#'     \item{se.pool: }{standard error that combined within and between variance}
+#'     \item{z.pool: }{z-statistic from dividing b by se}
+#'     \item{pvalue.pool: }{p-value for the hypothesis test that the coefficient is zero in the population}
+#'     \item{within.var: }{The square of the mean standard error across datasets}
+#'     \item{between.var: }{the variance of the coefficient across datasets}
+#'     }
+#' \item{bic}{A vector of BIC statistic for each dataset relative to the null model.}
 #' @examples
 #' markets <- replicate(5, generateCouples(3,acs.couples,
 #'                            acs.malealters,acs.femalealters,
@@ -306,6 +310,7 @@ poolChoiceModel <- function(formula, datasets) {
   m <- length(models)
   b <- sapply(models, coef)
   se <- sapply(models, function(model) {summary(model)$coef[,3]})
+  bic <- sapply(models, function(model) {diff(-2*model$loglik)+length(model$coef)*log(sum(model$y[,2]))})
 
   b.pool <- apply(b,1,mean)
   between.var <- apply(b,1,var)
@@ -314,7 +319,8 @@ poolChoiceModel <- function(formula, datasets) {
   z.pool <- b.pool/se.pool
   pvalue.pool <- (1-pnorm(abs(z.pool)))*2
 
-  return(data.frame(b.pool,se.pool,z.pool,pvalue.pool,within.var,between.var))
+  return(list(coefficients=data.frame(b.pool,se.pool,z.pool,pvalue.pool,within.var,between.var),
+              bic=bic))
 }
 
 
