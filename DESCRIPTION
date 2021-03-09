@@ -10,6 +10,5 @@ Description: Take a dataset of real unions and alternate partners and constructs
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 7.0.2
 Imports: wrswoR
-

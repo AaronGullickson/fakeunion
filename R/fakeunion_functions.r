@@ -267,6 +267,7 @@ organizeColumns <- function(couples, geo, keep=NULL) {
 #' @param formula an object of class \code{\link[stats]{formula}} specifying the \code{\link[survival]{clogit}} model to be
 #'                performed on each dataset.
 #' @param datasets a list of datasets where each dataset is produced from the \code{\link{generateCouples}} function.
+#' @param method A character string indicating the estimation method to use in the \code{\link[survival]{clogit}} model.
 #' @details Because the dataset of real and counterfactual unions is created by sampling among all the possible alternate partners,
 #'          the results of models will vary as a result of this sampling process. Therefore, it may be useful to generate multiple
 #'          datasets and pool model results across these datasets in a manner identical to multiple imputation, where the standard
@@ -292,6 +293,7 @@ organizeColumns <- function(couples, geo, keep=NULL) {
 #'     \item{within.var: }{The square of the mean standard error across datasets}
 #'     \item{between.var: }{the variance of the coefficient across datasets}
 #'     }
+#' \item{deviance}{A vector of deviances for each model.}
 #' \item{bic}{A vector of BIC statistic for each dataset relative to the null model.}
 #' @examples
 #' markets <- replicate(5, generateCouples(3,acs.couples,
@@ -301,15 +303,24 @@ organizeColumns <- function(couples, geo, keep=NULL) {
 #'
 #' poolChoiceModel(choice~ageh+I(ageh^2)+I(ageh-agew)+I((ageh-agew)^2)+strata(group),
 #'                 markets)
-poolChoiceModel <- function(formula, datasets) {
+poolChoiceModel <- function(formula, datasets, method="exact") {
   if(!require(survival)) {
     stop("survival package must be installed.")
   }
-  models <- lapply(datasets, function(dataset) {clogit(formula, data=dataset)})
+  if(require(parallel)) {
+    models <- mclapply(datasets, function(dataset) {
+      clogit(formula, data=dataset, method=method)
+    })
+  } else {
+    models <- lapply(datasets, function(dataset) {
+      clogit(formula, data=dataset, method=method)
+    })
+  }
 
   m <- length(models)
   b <- sapply(models, coef)
   se <- sapply(models, function(model) {summary(model)$coef[,3]})
+  deviance <- sapply(models, function(model) {-2*model$loglik[2]})
   bic <- sapply(models, function(model) {diff(-2*model$loglik)+length(model$coef)*log(sum(model$y[,2]))})
 
   b.pool <- apply(b,1,mean)
@@ -320,7 +331,7 @@ poolChoiceModel <- function(formula, datasets) {
   pvalue.pool <- (1-pnorm(abs(z.pool)))*2
 
   return(list(coefficients=data.frame(b.pool,se.pool,z.pool,pvalue.pool,within.var,between.var),
-              bic=bic))
+              deviance=deviance, bic=bic))
 }
 
 

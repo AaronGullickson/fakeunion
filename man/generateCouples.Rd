@@ -4,8 +4,17 @@
 \alias{generateCouples}
 \title{Generate Counterfactual Couples}
 \usage{
-generateCouples(n, actual, men, women, geo, id = "id", weight = NULL,
-  keep = NULL, verbose = TRUE)
+generateCouples(
+  n,
+  actual,
+  men,
+  women,
+  geo,
+  id = "id",
+  weight = NULL,
+  keep = NULL,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{n}{the number of counterfactual unions to create for each real union.}

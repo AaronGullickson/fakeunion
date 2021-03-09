@@ -4,13 +4,15 @@
 \alias{poolChoiceModel}
 \title{Run fixed effects conditional logit model on multiple datasets and pool results}
 \usage{
-poolChoiceModel(formula, datasets)
+poolChoiceModel(formula, datasets, method = "exact")
 }
 \arguments{
 \item{formula}{an object of class \code{\link[stats]{formula}} specifying the \code{\link[survival]{clogit}} model to be
 performed on each dataset.}
 
 \item{datasets}{a list of datasets where each dataset is produced from the \code{\link{generateCouples}} function.}
+
+\item{method}{A character string indicating the estimation method to use in the \code{\link[survival]{clogit}} model.}
 }
 \value{
 a list containing the following objects:
@@ -23,6 +25,7 @@ a list containing the following objects:
     \item{within.var: }{The square of the mean standard error across datasets}
     \item{between.var: }{the variance of the coefficient across datasets}
     }
+\item{deviance}{A vector of deviances for each model.}
 \item{bic}{A vector of BIC statistic for each dataset relative to the null model.}
 }
 \description{
