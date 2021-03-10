@@ -268,6 +268,7 @@ organizeColumns <- function(couples, geo, keep=NULL) {
 #'                performed on each dataset.
 #' @param datasets a list of datasets where each dataset is produced from the \code{\link{generateCouples}} function.
 #' @param method A character string indicating the estimation method to use in the \code{\link[survival]{clogit}} model.
+#' @param parallel A boolean indicating whether to use the parallel package to increase the speed of estimation via multiple cores.
 #' @details Because the dataset of real and counterfactual unions is created by sampling among all the possible alternate partners,
 #'          the results of models will vary as a result of this sampling process. Therefore, it may be useful to generate multiple
 #'          datasets and pool model results across these datasets in a manner identical to multiple imputation, where the standard
