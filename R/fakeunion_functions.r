@@ -303,11 +303,11 @@ organizeColumns <- function(couples, geo, keep=NULL) {
 #'
 #' poolChoiceModel(choice~ageh+I(ageh^2)+I(ageh-agew)+I((ageh-agew)^2)+strata(group),
 #'                 markets)
-poolChoiceModel <- function(formula, datasets, method="exact") {
+poolChoiceModel <- function(formula, datasets, method="exact", parallel=FALSE) {
   if(!require(survival)) {
     stop("survival package must be installed.")
   }
-  if(require(parallel)) {
+  if(parallel & require(parallel)) {
     models <- mclapply(datasets, function(dataset) {
       clogit(formula, data=dataset, method=method)
     })
