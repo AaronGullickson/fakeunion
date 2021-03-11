@@ -4,7 +4,7 @@
 \alias{poolChoiceModel}
 \title{Run fixed effects conditional logit model on multiple datasets and pool results}
 \usage{
-poolChoiceModel(formula, datasets, method = "exact")
+poolChoiceModel(formula, datasets, method = "exact", parallel = FALSE)
 }
 \arguments{
 \item{formula}{an object of class \code{\link[stats]{formula}} specifying the \code{\link[survival]{clogit}} model to be
@@ -13,6 +13,8 @@ performed on each dataset.}
 \item{datasets}{a list of datasets where each dataset is produced from the \code{\link{generateCouples}} function.}
 
 \item{method}{A character string indicating the estimation method to use in the \code{\link[survival]{clogit}} model.}
+
+\item{parallel}{A boolean indicating whether to use the parallel package to increase the speed of estimation via multiple cores.}
 }
 \value{
 a list containing the following objects:
