@@ -251,7 +251,7 @@ samplePartners <- function(actual, eligibles, n, partner, weight=NULL, id="id") 
 #' @param keep A vector of character strings giving additional variables to keep that don't end in
 #'             "h" or "w".
 organizeColumns <- function(couples, geo, keep=NULL) {
-  return(couples[c(which(colnames(couples) %in% c(geo,"group","choice",keep)),
+  return(couples[c(which(colnames(couples) %in% c(geo,"group","choice","sampled",keep)),
                    grep("h$",colnames(couples)),
                    grep("w$",colnames(couples)))])
 }
